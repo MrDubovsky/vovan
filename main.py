@@ -3,7 +3,8 @@ import os
 import threading
 from flask import Flask
 
-TOKEN = os.getenv("7972127811:AAEUqqTghlOuH32eeLgMMHApfBKRUIpK5yE")
+# Получаем токен из переменной окружения
+TOKEN = os.getenv("BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 app = Flask(__name__)
 
@@ -14,6 +15,7 @@ def send_welcome(message):
 def run_bot():
     bot.infinity_polling()
 
+# Запускаем бота в отдельном потоке
 threading.Thread(target=run_bot).start()
 
 @app.route('/')
