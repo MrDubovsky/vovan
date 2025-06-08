@@ -1,6 +1,8 @@
 import telebot
 import os
 import threading
+import time
+import requests
 from flask import Flask
 
 # Получаем токен из переменной окружения
@@ -17,17 +19,27 @@ app = Flask(__name__)
 def send_welcome(message):
     bot.send_message(message.chat.id, "👋 Привет! Вот ссылка на сайт: https://vovan.link/tgru")
 
-# Запускаем бота в отдельном потоке
+# Запуск бота в отдельном потоке
 def run_bot():
     bot.infinity_polling()
-
-threading.Thread(target=run_bot).start()
 
 # Заглушка Flask
 @app.route('/')
 def home():
     return 'Bot is running!'
 
-# Запуск Flask-сервера
+# Функция пинга своего же сервера, чтобы не засыпал Render
+def keep_alive():
+    while True:
+        try:
+            url = "https://" + os.getenv("RENDER_EXTERNAL_HOSTNAME", "127.0.0.1") + "/"
+            requests.get(url)
+        except Exception as e:
+            print(f"Ping failed: {e}")
+        time.sleep(600)  # каждые 10 минут
+
+# Запускаем всё
 if __name__ == '__main__':
+    threading.Thread(target=run_bot).start()
+    threading.Thread(target=keep_alive).start()
     app.run(host='0.0.0.0', port=10000)
